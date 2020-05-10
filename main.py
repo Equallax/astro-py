@@ -109,10 +109,10 @@ Saturn = CelestialBody(         'Saturn',           [Sun],  100,      4.5,      
 Titan = CelestialBody(           'Titan',   [Sun, Saturn],  25,       2,         [4.15, -0.01, 0],    [0, -49, 0], colour='red')
 Uranus = CelestialBody(         'Uranus',           [Sun],  100,      4.7,       [5, 0, 0],      [0, -93, 0], colour='#0088ff')
 Neptune = CelestialBody(        'Neptune',           [Sun], 100,      4.6,       [6, 0, 0],      [0, -83, 0], colour='#000096')
-Comet = CelestialBody(        'Comet',           [Sun], 30,      1,       [7, 7, 2],      [0, 0, -15], colour='#000096')
+Comet = CelestialBody(           'Comet',           [Sun], 30,      1,       [7, 7, 2],      [0, 0, -15], colour='#000096')
 
 #een list maken van de planeten
-bodies = [Sun, Comet]
+bodies = [Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Titan, Uranus, Neptune, Comet]
 
 #stelt het plot in om 3d te tonen
 
