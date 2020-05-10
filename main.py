@@ -6,35 +6,9 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.animation import PillowWriter
 from matplotlib.animation import FFMpegWriter
 from progress.bar import IncrementalBar
-
-
-class LoopingPillowWriter(PillowWriter):
-    def finish(self):
-        self._frames[0].save(
-            self._outfile, save_all=True, append_images=self._frames[1:],
-            duration=int(1000 / self.fps), loop=0)
-            
-            
-class FancyBar(IncrementalBar):
-    suffix = '%(percent).1f%% - %(eta)ds'
-
-
-'''
-programmanaam:     solarsystem
-auteur:            Dariush Mirkarimi & Milan Hak
-datum:             28-4-2020
-functionaliteit:   Weergeeft een live-simulatie van de baan van planeten om de zon, met behulp van matplotlib
-'''
-
-filename='comet.mp4'
-frames = 1500
-
-bar = FancyBar('Generating animation', max=frames)
-
-realistic = {
-    'real_G':  False,
-    'real_calculations': False
-}
+import pathlib
+import os
+import winsound
 
 
 #Een class word gemaakt. De hemellichamen worden allemaal object van deze class.
@@ -58,6 +32,41 @@ class CelestialBody:
         self.x_path[0] = self.pos[0]
         self.y_path[0] = self.pos[1]
         self.z_path[0] = self.pos[2]
+
+
+
+class LoopingPillowWriter(PillowWriter):
+    def finish(self):
+        self._frames[0].save(
+            self._outfile, save_all=True, append_images=self._frames[1:],
+            duration=int(1000 / self.fps), loop=0)
+            
+            
+class FancyBar(IncrementalBar):
+    suffix = '%(percent).1f%% - %(eta)ds remaining. Frame: %(index)d/%(max)d'
+
+
+
+dir='output'
+filename='elhamdouela.mp4'
+
+
+time_in_seconds = 60
+fps=60
+
+
+frames = fps*time_in_seconds
+bar = FancyBar(f'Creating {filename}', max=frames)
+
+
+
+
+realistic = {
+    'real_G':  False,
+    'real_calculations': False
+}
+
+
 
 #gebruikt de echte G
 if realistic['real_G'] is True:
@@ -99,20 +108,20 @@ else:
 
 #Hemellichamen als objecten van de CelestialBody class initialiseren
 #Hemellichamen als objecten van de CelestialBody class initialiseren
-Sun = CelestialBody(            'Sun',               None,  200,      20000,      [0, 0, 0],      [0, 0, 0], colour='C1')
-Mercury = CelestialBody(        'Mercury',          [Sun],  25,       4.5,       [0.5, 0, 0],    [0, -275, -30], colour='red')
-Venus = CelestialBody(          'Venus',            [Sun],  37,       4.5,       [0.8, 0, 0],    [0, -220, 25], colour='blue')
-Earth = CelestialBody(          'Earth',            [Sun],  50,       4.5,       [1.3, 0, 0],    [0, -165, 0], colour='C0')
-Mars = CelestialBody(           'Mars',             [Sun],  50,       3.5,       [1.8, 0, 0],    [0, -105, 0], colour='red')
-Jupiter = CelestialBody(        'Jupiter',          [Sun],  100,      5,         [3, 0, 0],      [0, -120, 30], colour='green')
-Saturn = CelestialBody(         'Saturn',           [Sun],  100,      4.5,       [4, 0, 0],      [0, -100, 0], colour='#b88d00')
-Titan = CelestialBody(           'Titan',   [Sun, Saturn],  25,       2,         [4.15, -0.01, 0],    [0, -49, 0], colour='red')
-Uranus = CelestialBody(         'Uranus',           [Sun],  100,      4.7,       [5, 0, 0],      [0, -93, 0], colour='#0088ff')
-Neptune = CelestialBody(        'Neptune',           [Sun], 100,      4.6,       [6, 0, 0],      [0, -83, 0], colour='#000096')
-Comet = CelestialBody(           'Comet',           [Sun], 30,      1,       [7, 7, 2],      [0, 0, -15], colour='#000096')
+Sun = CelestialBody(            'Sun',               None,  200,      2000,      [0, 0, 0],              [0, 0, 0], colour='C1')
+Mercury = CelestialBody(        'Mercury',          [Sun],  25,       4.5,       [0.5, 0, 0],            [0, -275, -30], colour='red')
+Venus = CelestialBody(          'Venus',            [Sun],  37,       4.5,       [0.8, 0, 0],            [0, -220, 25], colour='blue')
+Earth = CelestialBody(          'Earth',            [Sun],  50,       4.5,       [1.3, 0, 0],            [0, -165, 0], colour='C0')
+Mars = CelestialBody(           'Mars',             [Sun],  50,       3.5,       [1.8, 0, 0],            [0, -105, 0], colour='red')
+Jupiter = CelestialBody(        'Jupiter',          [Sun],  100,      5,         [3, 0, 0],              [0, -120, 30], colour='green')
+Saturn = CelestialBody(         'Saturn',           [Sun],  100,      4.5,       [4, 0, 0],              [0, -100, 0], colour='#b88d00')
+Titan = CelestialBody(           'Titan',   [Sun, Saturn],  25,       2,         [4.17, -0.01, 0],       [0, -49, 0], colour='red')
+Uranus = CelestialBody(         'Uranus',           [Sun],  100,      4.7,       [5, 0, 0],              [0, -93, 0], colour='#0088ff')
+Neptune = CelestialBody(        'Neptune',          [Sun],  100,      4.6,       [6, 0, 0],              [0, -83, 0], colour='#000096')
+Comet = CelestialBody(           'Comet',           [Sun],  30,       1,         [7, 7, 2],              [0, 0, -2], colour='#000096')
 
 #een list maken van de planeten
-bodies = [Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Titan, Uranus, Neptune, Comet]
+bodies = [Sun, Saturn, Titan]
 
 #stelt het plot in om 3d te tonen
 
@@ -217,14 +226,12 @@ def sim(scatter_plot):
 
 
 
-
+if not os.path.isdir(os.path.join(pathlib.Path().absolute(),'dir')):
+    os.mkdir(dir)
 
 animation = FuncAnimation(fig, func=sim, frames=frames, interval=1)
+animation.save(dir+'\\'+filename, writer=FFMpegWriter(fps=fps))
 
-# animation.save('orbit.mp4', writer='writer')
-
-# plt.show()
-
-animation.save(filename, writer=FFMpegWriter(fps=60))
 bar.finish()
+winsound.PlaySound('SystemAsterisk', 0)
 exit()
