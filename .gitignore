@@ -125,5 +125,5 @@ dmypy.json
 .pyre/
 
 #output file types
-.gif
-.mp4
+*.gif
+*.mp4
