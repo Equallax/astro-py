@@ -9,7 +9,7 @@ from progress.bar import IncrementalBar
 import pathlib
 import os
 import winsound
-
+from body_import import body_load
 
 #Een class word gemaakt. De hemellichamen worden allemaal object van deze class.
 class CelestialBody:
@@ -48,12 +48,11 @@ class FancyBar(IncrementalBar):
 
 
 dir='output'
-filename='elhamdouela.mp4'
+filename='json_test.mp4'
 
 
-time_in_seconds = 60
-fps=60
-
+time_in_seconds = 10
+fps=30
 
 frames = fps*time_in_seconds
 bar = FancyBar(f'Creating {filename}', max=frames)
@@ -118,10 +117,18 @@ Saturn = CelestialBody(         'Saturn',           [Sun],  100,      4.5,      
 Titan = CelestialBody(           'Titan',   [Sun, Saturn],  25,       2,         [4.17, -0.01, 0],       [0, -49, 0], colour='red')
 Uranus = CelestialBody(         'Uranus',           [Sun],  100,      4.7,       [5, 0, 0],              [0, -93, 0], colour='#0088ff')
 Neptune = CelestialBody(        'Neptune',          [Sun],  100,      4.6,       [6, 0, 0],              [0, -83, 0], colour='#000096')
-Comet = CelestialBody(           'Comet',           [Sun],  30,       1,         [7, 7, 2],              [0, 0, -2], colour='#000096')
+#Comet = CelestialBody(           'Comet',           [Sun],  30,       1,         [7, 7, 2],              [0, 0, -2], colour='#000096')
 
 #een list maken van de planeten
-bodies = [Sun, Saturn, Titan]
+bodies = [Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Titan, Uranus, Neptune]
+
+
+for x in body_load():
+    orbiting = [globals()[i] for i in x['orbiting']]
+    bodies.append(CelestialBody(x['name'],orbiting, x['radius'],x['mass'],x['pos'], x['momentum'],x['colour']))
+
+
+
 
 #stelt het plot in om 3d te tonen
 
@@ -226,7 +233,7 @@ def sim(scatter_plot):
 
 
 
-if not os.path.isdir(os.path.join(pathlib.Path().absolute(),'dir')):
+if not os.path.isdir(os.path.join(pathlib.Path().absolute(),dir)):
     os.mkdir(dir)
 
 animation = FuncAnimation(fig, func=sim, frames=frames, interval=1)
