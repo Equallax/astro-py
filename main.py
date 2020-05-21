@@ -41,11 +41,11 @@ class FancyBar(IncrementalBar):
 
 
 dir='output'
-filename='stress_test.mp4'
+filename='stress_test2.mp4'
 
 json_path = 'data.json'
 
-time_in_seconds = 20
+time_in_seconds = 10
 fps=144
 
 frames = fps*time_in_seconds
@@ -131,7 +131,7 @@ def sim(scatter_plot):
     '''
 
 
-    dt = 0.001
+    dt = 0.001*fps/30
     t = 0
     #gebruikt realistische berekeningen waarin alles met alles rekening houdt
     if realistic['real_calculations'] is True:
