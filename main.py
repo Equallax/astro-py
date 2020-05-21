@@ -9,7 +9,8 @@ from progress.bar import IncrementalBar
 import pathlib
 import os
 import winsound
-from body_import import body_load
+import json
+
 
 #Een class word gemaakt. De hemellichamen worden allemaal object van deze class.
 class CelestialBody:
@@ -33,26 +34,19 @@ class CelestialBody:
         self.y_path[0] = self.pos[1]
         self.z_path[0] = self.pos[2]
 
-
-
-class LoopingPillowWriter(PillowWriter):
-    def finish(self):
-        self._frames[0].save(
-            self._outfile, save_all=True, append_images=self._frames[1:],
-            duration=int(1000 / self.fps), loop=0)
             
             
 class FancyBar(IncrementalBar):
     suffix = '%(percent).1f%% - %(eta)ds remaining. Frame: %(index)d/%(max)d'
 
 
-
 dir='output'
-filename='json_test.mp4'
+filename='stress_test.mp4'
 
+json_path = 'data.json'
 
-time_in_seconds = 10
-fps=30
+time_in_seconds = 20
+fps=144
 
 frames = fps*time_in_seconds
 bar = FancyBar(f'Creating {filename}', max=frames)
@@ -107,27 +101,13 @@ else:
 
 #Hemellichamen als objecten van de CelestialBody class initialiseren
 #Hemellichamen als objecten van de CelestialBody class initialiseren
-Sun = CelestialBody(            'Sun',               None,  200,      2000,      [0, 0, 0],              [0, 0, 0], colour='C1')
-Mercury = CelestialBody(        'Mercury',          [Sun],  25,       4.5,       [0.5, 0, 0],            [0, -275, -30], colour='red')
-Venus = CelestialBody(          'Venus',            [Sun],  37,       4.5,       [0.8, 0, 0],            [0, -220, 25], colour='blue')
-Earth = CelestialBody(          'Earth',            [Sun],  50,       4.5,       [1.3, 0, 0],            [0, -165, 0], colour='C0')
-Mars = CelestialBody(           'Mars',             [Sun],  50,       3.5,       [1.8, 0, 0],            [0, -105, 0], colour='red')
-Jupiter = CelestialBody(        'Jupiter',          [Sun],  100,      5,         [3, 0, 0],              [0, -120, 30], colour='green')
-Saturn = CelestialBody(         'Saturn',           [Sun],  100,      4.5,       [4, 0, 0],              [0, -100, 0], colour='#b88d00')
-Titan = CelestialBody(           'Titan',   [Sun, Saturn],  25,       2,         [4.17, -0.01, 0],       [0, -49, 0], colour='red')
-Uranus = CelestialBody(         'Uranus',           [Sun],  100,      4.7,       [5, 0, 0],              [0, -93, 0], colour='#0088ff')
-Neptune = CelestialBody(        'Neptune',          [Sun],  100,      4.6,       [6, 0, 0],              [0, -83, 0], colour='#000096')
-#Comet = CelestialBody(           'Comet',           [Sun],  30,       1,         [7, 7, 2],              [0, 0, -2], colour='#000096')
-
 #een list maken van de planeten
-bodies = [Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Titan, Uranus, Neptune]
 
-
-for x in body_load():
-    orbiting = [globals()[i] for i in x['orbiting']]
-    bodies.append(CelestialBody(x['name'],orbiting, x['radius'],x['mass'],x['pos'], x['momentum'],x['colour']))
-
-
+with open(json_path, 'r', encoding='UTF-8') as json_file:
+    json_dict = json.load(json_file)
+    
+ 
+bodies = [CelestialBody(data['name'], data['orbiting'], data['radius'],data['mass'],data['pos'], data['momentum'],data['colour']) for name, data in json_dict.items()]
 
 
 #stelt het plot in om 3d te tonen
@@ -139,7 +119,7 @@ ax = fig.add_subplot(111, projection='3d')
 ax.grid(True, linestyle='-', color='0.75')
 ax.view_init(elev=60, azim=-45)
 #initialiseert het plot met de positie van de aarde
-scat = plt.scatter(Earth.pos[0], Earth.pos[1], 0)
+#scat = plt.scatter(Earth.pos[0], Earth.pos[1], 0)
 
 #berekent de krachten op de planeten op een wijze vergelijkbaar met coach maar dan beter en in 3d
 #de simulatie functie 
@@ -186,16 +166,16 @@ def sim(scatter_plot):
             forces = np.zeros(3, dtype=np.float64)
 
             #past posities van hemellichamen aan op basis van de krachten die op hen werken
-            if current_body.orbiting is not None and current_body is not Sun:
+            if current_body.orbiting is not None and current_body is not bodies[0]:
                 for i in current_body.orbiting:
-                    forces += gravity(current_body, i)
+                    forces += gravity(current_body, bodies[i])
                     
                 force_list.append(forces)
             else:
                 force_list.append((0,0,0))
                 
         for i, current_body in enumerate(bodies):
-            if current_body.orbiting is not None and current_body is not Sun:
+            if current_body.orbiting is not None and current_body is not bodies[0]:
                 current_body.force = force_list[i]
                 current_body.momentum += current_body.force * dt
                 current_body.pos += current_body.momentum / current_body.mass * dt
