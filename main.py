@@ -211,7 +211,6 @@ def sim(scatter_plot):
     return [scatter_plot]
 
 
-
 if not os.path.isdir(os.path.join(pathlib.Path().absolute(),dir)):
     os.mkdir(dir)
 
