@@ -1,9 +1,7 @@
-from scipy.constants import G
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
-from matplotlib.animation import PillowWriter
 from matplotlib.animation import FFMpegWriter
 from progress.bar import IncrementalBar
 import pathlib
@@ -33,70 +31,39 @@ class CelestialBody:
         self.x_path[0] = self.pos[0]
         self.y_path[0] = self.pos[1]
         self.z_path[0] = self.pos[2]
-
+ 
             
-            
-class FancyBar(IncrementalBar):
+class AnimationProgressBar(IncrementalBar):
     suffix = '%(percent).1f%% - %(eta)ds remaining. Frame: %(index)d/%(max)d'
 
 
 dir='output'
 filename='stress_test2.mp4'
-
 json_path = 'data.json'
 
 time_in_seconds = 10
 fps=144
 
 frames = fps*time_in_seconds
-bar = FancyBar(f'Creating {filename}', max=frames)
+bar = AnimationProgressBar(f'Creating {filename}', max=frames)
 
 
+def gravity(x, y):
 
-
-realistic = {
-    'real_G':  False,
-    'real_calculations': False
-}
-
-
-
-#gebruikt de echte G
-if realistic['real_G'] is True:
-    def gravity(x, y):
+    '''
+    Functie die ervoor zorgt dat gravitatiekracht tussen hemellichamen kan worden berekent
+    Dat gebeurt hier met het getal 1 in plaats van de echte de echte gravitatieconstante
+    '''
     
-        '''
-        Functie die ervoor zorgt dat gravitatiekracht tussen hemellichamen kan worden berekent
-        Dat gebeurt hier met de echte gravitatieconstante
-        '''
-        
-        r_vec = x.pos - y.pos
-        r_mag = np.linalg.norm(r_vec)
-        r_hat = r_vec / r_mag
-        # Calculate force magnitude.
-        force_mag = G * x.mass * y.mass / r_mag ** 2
-        # Calculate force vector.
-        force_vec = -force_mag * r_hat
+    r_vec = x.pos - y.pos
+    r_mag = np.linalg.norm(r_vec)
+    r_hat = r_vec / r_mag
+    # Calculate force magnitude.
+    force_mag = 1 * x.mass * y.mass / r_mag ** 2
+    # Calculate force vector.
+    force_vec = -force_mag * r_hat
 
-        return force_vec
-else:
-    #gebruikt 1 in plaats van G
-    def gravity(x, y):
-    
-        '''
-        Functie die ervoor zorgt dat gravitatiekracht tussen hemellichamen kan worden berekent
-        Dat gebeurt hier met het getal 1 in plaats van de echte de echte gravitatieconstante
-        '''
-        
-        r_vec = x.pos - y.pos
-        r_mag = np.linalg.norm(r_vec)
-        r_hat = r_vec / r_mag
-        # Calculate force magnitude.
-        force_mag = 1 * x.mass * y.mass / r_mag ** 2
-        # Calculate force vector.
-        force_vec = -force_mag * r_hat
-
-        return force_vec
+    return force_vec
 
 
 #Hemellichamen als objecten van de CelestialBody class initialiseren
@@ -104,8 +71,7 @@ else:
 #een list maken van de planeten
 
 with open(json_path, 'r', encoding='UTF-8') as json_file:
-    json_dict = json.load(json_file)
-    
+    json_dict = json.load(json_file) 
  
 bodies = [CelestialBody(data['name'], data['orbiting'], data['radius'],data['mass'],data['pos'], data['momentum'],data['colour']) for name, data in json_dict.items()]
 
@@ -119,7 +85,6 @@ ax = fig.add_subplot(111, projection='3d')
 ax.grid(True, linestyle='-', color='0.75')
 ax.view_init(elev=60, azim=-45)
 #initialiseert het plot met de positie van de aarde
-#scat = plt.scatter(Earth.pos[0], Earth.pos[1], 0)
 
 #berekent de krachten op de planeten op een wijze vergelijkbaar met coach maar dan beter en in 3d
 #de simulatie functie 
@@ -130,61 +95,34 @@ def sim(scatter_plot):
     Dat gebeurt behulp van de simulatie functie die ervoor zorgt dat krachten tussen de hemellichamen worden berekent.
     '''
 
-
     dt = 0.001*fps/30
     t = 0
     #gebruikt realistische berekeningen waarin alles met alles rekening houdt
-    if realistic['real_calculations'] is True:
-        force_list = []
-        for current_body in bodies:
-            temp = bodies.copy()
-            temp.pop(temp.index(current_body))
-            #past posities van hemellichamen aan op basis van de krachten die op hen werken
-            forces = np.zeros(3, dtype=np.float64)
-            for affecting_body in temp:
-                forces += gravity(current_body, affecting_body)
+    
+    force_list = []
+    for current_body in bodies:
+        forces = np.zeros(3, dtype=np.float64)
+
+        #past posities van hemellichamen aan op basis van de krachten die op hen werken
+        if current_body.orbiting is not None and current_body is not bodies[0]:
+            for i in current_body.orbiting:
+                forces += gravity(current_body, bodies[i])
                 
             force_list.append(forces)
-                
-                
-        for i, current_body in enumerate(bodies): 
             
+        else:
+            force_list.append((0,0,0))
+            
+    for i, current_body in enumerate(bodies):
+        if current_body.orbiting is not None and current_body is not bodies[0]:
             current_body.force = force_list[i]
             current_body.momentum += current_body.force * dt
             current_body.pos += current_body.momentum / current_body.mass * dt
-            
+
             #past trails toe om de vorige posities te kunnen zien
             current_body.x_path = np.append(current_body.x_path, current_body.pos[0])
             current_body.y_path = np.append(current_body.y_path, current_body.pos[1])
-            current_body.z_path = np.append(current_body.z_path, current_body.pos[2])
-            
-        t += dt
-    #gebruikt versimpelde berekeningen waarin de planeten alleen met de orbiting bodies rekening houden
-    else:
-        force_list = []
-        for current_body in bodies:
-            forces = np.zeros(3, dtype=np.float64)
-
-            #past posities van hemellichamen aan op basis van de krachten die op hen werken
-            if current_body.orbiting is not None and current_body is not bodies[0]:
-                for i in current_body.orbiting:
-                    forces += gravity(current_body, bodies[i])
-                    
-                force_list.append(forces)
-            else:
-                force_list.append((0,0,0))
-                
-        for i, current_body in enumerate(bodies):
-            if current_body.orbiting is not None and current_body is not bodies[0]:
-                current_body.force = force_list[i]
-                current_body.momentum += current_body.force * dt
-                current_body.pos += current_body.momentum / current_body.mass * dt
-
-                #past trails toe om de vorige posities te kunnen zien
-                current_body.x_path = np.append(current_body.x_path, current_body.pos[0])
-                current_body.y_path = np.append(current_body.y_path, current_body.pos[1])
-                current_body.z_path = np.append(current_body.z_path, current_body.pos[2])
-                
+            current_body.z_path = np.append(current_body.z_path, current_body.pos[2])    
         
         t += dt
     bar.next()
@@ -203,14 +141,9 @@ def sim(scatter_plot):
     for i in bodies:
         ax.plot(i.x_path[-100::], i.y_path[-100::], i.z_path[-100::], color=i.colour, zorder=3.9, alpha=0.5)
         if i.colour is not None:
-            ax.scatter(i.pos[0], i.pos[1], i.pos[2], s=i.radius, color=i.colour, zorder=2)
-            #ax.text(i.pos[0], i.pos[1], i.pos[2], s=i.name, zorder=10.,
-                    #verticalalignment='center_baseline', horizontalalignment='center', fontsize=8)
-
-        
+            ax.scatter(i.pos[0], i.pos[1], i.pos[2], s=i.radius, color=i.colour, zorder=2)     
 
     return [scatter_plot]
-
 
 
 if not os.path.isdir(os.path.join(pathlib.Path().absolute(),dir)):
