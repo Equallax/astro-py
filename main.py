@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
-from matplotlib.animation import PillowWriter
 from matplotlib.animation import FFMpegWriter
 from progress.bar import IncrementalBar
 import pathlib
@@ -212,12 +211,15 @@ def sim(scatter_plot):
     return [scatter_plot]
 
 
-
 if not os.path.isdir(os.path.join(pathlib.Path().absolute(),dir)):
     os.mkdir(dir)
 
 animation = FuncAnimation(fig, func=sim, frames=frames, interval=1)
-animation.save(dir+'\\'+filename, writer=FFMpegWriter(fps=fps))
+
+try:
+    animation.save(dir+'\\'+filename, writer=FFMpegWriter(fps=fps))
+except:
+    print("FFMpeg was unavailable. Stopping program")
 
 bar.finish()
 winsound.PlaySound('SystemAsterisk', 0)
