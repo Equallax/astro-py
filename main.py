@@ -95,7 +95,6 @@ else:
         return force_vec
 
 # Hemellichamen als objecten van de CelestialBody class initialiseren
-# Hemellichamen als objecten van de CelestialBody class initialiseren
 # een list maken van de planeten
 
 with open(json_path, 'r', encoding='UTF-8') as json_file:
