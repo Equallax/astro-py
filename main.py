@@ -2,7 +2,6 @@ import json
 import os
 import pathlib
 import winsound
-
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FFMpegWriter
