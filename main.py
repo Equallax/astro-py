@@ -11,6 +11,12 @@ from matplotlib.animation import FuncAnimation
 from progress.bar import IncrementalBar
 from scipy.constants import G
 
+
+realistic = {
+    'real_G': False,
+    'real_calculations': False
+}
+
 output_dir = 'output'
 filename = 'stress_testXtreme.mp4'
 
@@ -52,10 +58,6 @@ class FancyBar(IncrementalBar):
 
 bar = FancyBar(f'Creating {filename}', max=frames)
 
-realistic = {
-    'real_G': False,
-    'real_calculations': False
-}
 
 # gebruikt de echte G
 if realistic['real_G'] is True:

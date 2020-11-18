@@ -1,10 +1,7 @@
 #In cmd:
 #       py -m pip install -r "locatie van dit bestand"
-#	OF
-#       py -m pip install matplotlib numpy scipy
-
-
-#De volgende modules zijn nodig om het programma te kunnen gebruiken
+#
+# Instaleer FFMEG via https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.7z
 
 matplotlib~=3.2.1
 numpy~=1.18.2
